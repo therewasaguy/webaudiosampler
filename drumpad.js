@@ -10,6 +10,8 @@ var pad1, pad2, pad3, pad4;
 var dragging = false; // global dragging var
 var wasDragging = false;
 
+var root = 'audio/drums/'; // change the root directory to pick different default samples
+
 var drumpad = function( sketch ) {
   var sample;
   var cnv;
@@ -339,18 +341,18 @@ function draw(){
 }
 
 function keyPressed(e){
-  if (e.keyCode == '37') {
-    pad2.pressed();
-  };
-  if (e.keyCode == '39') {
-    pad4.pressed();
-  };
-  if (e.keyCode == '65') {
-    pad1.pressed();
-  };
-  if (e.keyCode == '68') {
-    pad3.pressed();
-  };
+  // if (e.keyCode == '37') {
+  //   pad2.pressed();
+  // };
+  // if (e.keyCode == '39') {
+  //   pad4.pressed();
+  // };
+  // if (e.keyCode == '65') {
+  //   pad1.pressed();
+  // };
+  // if (e.keyCode == '68') {
+  //   pad3.pressed();
+  // };
   if (e.keyCode == '9') { // TAB: ToggleSettings
     toggleSettings();
   }
@@ -383,37 +385,66 @@ var toggleSettings = function(){
 
 // Set up drum pads and position them on the page
 window.onload = function() {
-    var containerNode = document.getElementById( 'q' );
-    pad1 = new p5(drumpad, containerNode);
-    pad1.setSample('audio/drum2.mp3');
-    pad1.settingsPosition(400, 400);
-    containerNode.pCtx = pad1;
-    containerNode.addEventListener('dragover', handleDragOver, false);
-    containerNode.addEventListener('drop', handleFileSelect, false);
-
-    var containerNode2 = document.getElementById( 'w' );
-    pad2 = new p5(drumpad, containerNode2);
-    pad2.setSample('audio/drum6.mp3');
-    pad2.settingsPosition(400, 800);
-    containerNode2.pCtx = pad2;
-    containerNode2.addEventListener('dragover', handleDragOver, false);
-    containerNode2.addEventListener('drop', handleFileSelect, false);
-
-
-    var containerNode3 = document.getElementById( 'e' );
-    pad3 = new p5(drumpad, containerNode3);
-    pad3.setSample('audio/drum5.mp3');
-    pad3.settingsPosition(800, 400);
-    containerNode3.pCtx = pad3;
-    containerNode3.addEventListener('dragover', handleDragOver, false);
-    containerNode3.addEventListener('drop', handleFileSelect, false);
-
-
-    var containerNode4 = document.getElementById( 'r' );
-    pad4 = new p5(drumpad, containerNode4);
-    pad4.setSample('audio/drum4.mp3');
-    pad4.settingsPosition(800, 800);
-    containerNode4.pCtx = pad4;
-    containerNode4.addEventListener('dragover', handleDragOver, false);
-    containerNode4.addEventListener('drop', handleFileSelect, false);
+  assignPads();
 };
+
+function assignPads() {
+  var keyRows = document.getElementsByClassName("keyRow");
+  var samplePointer = 0;
+  for (var i = 0; i < keyRows.length; i++){
+    var y = 200 * i; // x position
+    for (var j = 0; j<keyRows[i].children.length; j++){
+      var x = 200 * j;
+      newPad(keyRows[i].children[j], x, y, samplePointer);
+      samplePointer ++;
+    }
+  }
+}
+
+function newPad(aDiv, x, y, samplePointer){
+  var pad = new p5(drumpad, aDiv);
+  var sample = root + samplePointer + '.mp3';
+  if (urlExists(sample)){
+    pad.setSample(sample);
+    console.log(aDiv.id + ' = ' + sample);
+    var padOn = true;
+  }
+  pad.settingsPosition(x, y);
+  aDiv.pCtx = pad4;
+  aDiv.addEventListener('dragover', handleDragOver, false);
+  aDiv.addEventListener('drop', handleFileSelect, false);
+
+  // if it is a special key
+  if (aDiv.getAttribute('keycode') !== null) {
+    console.log("keyCode: " + aDiv.getAttribute('keycode'));
+
+    var thisEvent = function(e) {
+      // console.log();
+      if (e.keyCode == aDiv.getAttribute('keycode') ){
+        console.log(e.keyCode + ' = '+ aDiv.getAttribute('keycode'));
+        if (padOn === true){
+          pad.pressed();
+        }
+      }
+    }
+    window.addEventListener("keydown", thisEvent, false);
+  }
+
+
+  // if it isnt a special key
+  pad.keyTyped = function(e){
+    if (key == aDiv.id){
+      console.log(e);
+      if (padOn === true){
+        pad.pressed();
+      }
+    }
+  }
+}
+
+function urlExists(path){
+  var http = new XMLHttpRequest();
+  http.open('HEAD', path, false);
+  http.send();
+  return http.status!=404;
+}
