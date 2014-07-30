@@ -77,6 +77,8 @@ var drumpad = function( sketch ) {
         else if (recording === true ) {
           // draw waveform if recording
           var waveform = fft.waveform();
+          sketch.strokeWeight(5);
+          sketch.stroke(255);
           sketch.beginShape();
           sketch.background(255,0,0,200);
           for (var i = 0; i< waveform.length; i++){
@@ -136,7 +138,6 @@ var drumpad = function( sketch ) {
       }
     }
   };
-
 
   sketch.mouseDragged = function(){
     if (dragging === false && sketch.dragging === false && sketch.mouseY >=0 && sketch.mouseY <= sketch.height && sketch.mouseX >=0 && sketch.mouseX <= sketch.width){
@@ -221,7 +222,7 @@ var drumpad = function( sketch ) {
   sketch.setSample = function(s) {
     sample = sketch.loadSound(s);
     sample.volume = .5;
-    sample.playMode('mono');
+    sample.playMode('restart');
     amp.setInput(sample.output);
     amp.toggleNormalize();
   };
@@ -312,10 +313,20 @@ var drumpad = function( sketch ) {
 }; // end drumpad
 
 
+var createGUI = function() {
+  modeButton = createButton(modeButtonLabel);
+  modeButton.position(800,20);
+  modeButton.mousePressed(toggleMode);
+
+  setButton = createButton('Settings');
+  setButton.position(800,40);
+  setButton.mousePressed(toggleSettings);
+
+};
 
 function setup(){
-  createGUI();
   mic = new AudioIn();
+  createGUI();
   mic.on();
   mic.amplitude.toggleNormalize();
   fft = new FFT(.1, 128);
@@ -345,16 +356,6 @@ function keyPressed(e){
   }
 };
 
-var createGUI = function() {
-  modeButton = createButton(modeButtonLabel);
-  modeButton.position(800,20);
-  modeButton.mousePressed(toggleMode);
-
-  setButton = createButton('Settings');
-  setButton.position(800,40);
-  setButton.mousePressed(toggleSettings);
-
-};
 
 var toggleMode = function(){
   if (mode !== 'rec') {
@@ -382,7 +383,7 @@ var toggleSettings = function(){
 
 // Set up drum pads and position them on the page
 window.onload = function() {
-    var containerNode = document.getElementById( 'pad1' );
+    var containerNode = document.getElementById( 'q' );
     pad1 = new p5(drumpad, containerNode);
     pad1.setSample('audio/drum2.mp3');
     pad1.settingsPosition(400, 400);
@@ -390,7 +391,7 @@ window.onload = function() {
     containerNode.addEventListener('dragover', handleDragOver, false);
     containerNode.addEventListener('drop', handleFileSelect, false);
 
-    var containerNode2 = document.getElementById( 'pad2' );
+    var containerNode2 = document.getElementById( 'w' );
     pad2 = new p5(drumpad, containerNode2);
     pad2.setSample('audio/drum6.mp3');
     pad2.settingsPosition(400, 800);
@@ -399,7 +400,7 @@ window.onload = function() {
     containerNode2.addEventListener('drop', handleFileSelect, false);
 
 
-    var containerNode3 = document.getElementById( 'pad3' );
+    var containerNode3 = document.getElementById( 'e' );
     pad3 = new p5(drumpad, containerNode3);
     pad3.setSample('audio/drum5.mp3');
     pad3.settingsPosition(800, 400);
@@ -408,7 +409,7 @@ window.onload = function() {
     containerNode3.addEventListener('drop', handleFileSelect, false);
 
 
-    var containerNode4 = document.getElementById( 'pad4' );
+    var containerNode4 = document.getElementById( 'r' );
     pad4 = new p5(drumpad, containerNode4);
     pad4.setSample('audio/drum4.mp3');
     pad4.settingsPosition(800, 800);

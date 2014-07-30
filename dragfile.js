@@ -72,7 +72,6 @@ function handleDragOver(evt) {
 
 // setup drag 'n drop listener
 var dropZone = document.getElementsByClassName('drop_zone');
-console.log(dropZone);
 
 for (var i = 0; i < dropZone.length; i++){
   dropZone[i].addEventListener('dragover', handleDragOver, false);

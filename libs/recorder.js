@@ -5,7 +5,7 @@
   var Recorder = function(source, cfg){
     var config = cfg || {};
     var bufferLen = config.bufferLen || 4096;
-    this.context = source.p5s.audiocontext;
+    this.context = getAudioContext();
     this.node = (this.context.createScriptProcessor ||
                  this.context.createJavaScriptNode).call(this.context,
                                                          bufferLen, 2, 2);
