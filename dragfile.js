@@ -30,7 +30,9 @@ function handleFileSelect(evt) {
   console.log(file);
 
   // which p5 context will do the loading?
+  // console.log(this.childNodes[0].getContext());
   ctx = this.pCtx;
+  // ctx = this.childNodes[0].getContext();
 
   loadBlob(file);
 }
@@ -60,6 +62,7 @@ function loadArrayBuffer(arraybuffer) {
 function decodeArrayBuffer(arrayBuffer, callback, error){
   var ac = getAudioContext();
   ac.decodeAudioData(arrayBuffer, function (data) {
+    console.log(ctx);
     ctx.setBuffer(data);
   });
 }

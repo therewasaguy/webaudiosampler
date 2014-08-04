@@ -10,6 +10,11 @@ var pad1, pad2, pad3, pad4;
 var dragging = false; // global dragging var
 var wasDragging = false;
 
+var cnvWidth = 200;
+var cnvHeight = 200;
+
+var vidOffset = 300;
+
 var root = 'audio/drums/'; // change the root directory to pick different default samples
 
 var drumpad = function( sketch ) {
@@ -41,7 +46,7 @@ var drumpad = function( sketch ) {
 
 
   sketch.setup = function() {
-    cnv = sketch.createCanvas(400, 400);
+    cnv = sketch.createCanvas(cnvWidth, cnvHeight);
     cnv.mousePressed(sketch.pressed);
     revButton.mousePressed(sketch.revBuffer);
     loopButton.mousePressed(sketch.toggleLoop);
@@ -121,15 +126,14 @@ var drumpad = function( sketch ) {
 
   sketch.drawPlayhead = function() {
     if (sample && sample.isLoaded()) {
+
       // draw playhead
       sketch.stroke(0);
-      var playPercentage = map( sample.currentTime(), 0, sample.duration(), 0, sketch.width);
-      sketch.line(playPercentage, 0, playPercentage,sketch.height);
+      // var playPercentage = map( sample.currentTime(), 0, sample.duration(), 0, sketch.width);
+      // sketch.line(playPercentage, 0, playPercentage,sketch.height);
 
       // draw start and stop markers
       sketch.stroke(255,255,0);
-      // var startLine = map( startMarker, 0, sketch.width, 0, sample.duration());
-      // var stopLine = map( stopMarker, 0, sketch.width, 0, sample.duration());
       sketch.line(sketch.startMarker, 0, sketch.startMarker,sketch.height);
       sketch.line(sketch.stopMarker, 0, sketch.stopMarker,sketch.height);
       sketch.fill(0,255,0,20);
@@ -205,7 +209,7 @@ var drumpad = function( sketch ) {
       }
     } else if (mode === 'rec') {
       if (recording === false) {
-        sample.stopAll();
+        sample.stop();
         sketch.background(255,0,0,200);
         if (mic.getLevel() > .01) {
           // record on attack
@@ -283,15 +287,15 @@ var drumpad = function( sketch ) {
   sketch.settingsPosition = function(w, h){
     sketch.stroke(255);
     rateLabel = createP('rate: ');
-    rateLabel.position(w-350, h-90);
-    rateSlider.position(w-350, h-50);
-    volSlider.position(w-200, h-50);
+    rateLabel.position(w+cnvWidth-w*0.875, h-h*0.225);
+    rateSlider.position(w+cnvWidth-w*0.875, h-h/8);
+    volSlider.position(w+cnvWidth-w/2, h-h/8);
     volLabel = createP('volume: ');
-    volLabel.position(w-200, h-90);
+    volLabel.position(w+cnvWidth-w/2, h-h*0.225);
 
-    revButton.position(w-350, h-100)
-    loopButton.position(w-200, h-100);
-    cnv.position(w-400,h-400);
+    revButton.position(w-w*0.875, h-h/4)
+    loopButton.position(w-w/2, h-h/4);
+    cnv.position(w,h);
   };
 
   sketch.showSettings = function() {
@@ -317,11 +321,11 @@ var drumpad = function( sketch ) {
 
 var createGUI = function() {
   modeButton = createButton(modeButtonLabel);
-  modeButton.position(800,20);
+  modeButton.position(vidOffset + 100,20);
   modeButton.mousePressed(toggleMode);
 
   setButton = createButton('Settings');
-  setButton.position(800,40);
+  setButton.position(vidOffset + 100,40);
   setButton.mousePressed(toggleSettings);
 
 };
@@ -329,7 +333,7 @@ var createGUI = function() {
 function setup(){
   mic = new AudioIn();
   createGUI();
-  mic.on();
+  mic.start();
   mic.amplitude.toggleNormalize();
   fft = new FFT(.1, 128);
   fft.setInput(mic);
@@ -341,18 +345,6 @@ function draw(){
 }
 
 function keyPressed(e){
-  // if (e.keyCode == '37') {
-  //   pad2.pressed();
-  // };
-  // if (e.keyCode == '39') {
-  //   pad4.pressed();
-  // };
-  // if (e.keyCode == '65') {
-  //   pad1.pressed();
-  // };
-  // if (e.keyCode == '68') {
-  //   pad3.pressed();
-  // };
   if (e.keyCode == '9') { // TAB: ToggleSettings
     toggleSettings();
   }
@@ -392,7 +384,7 @@ function assignPads() {
   var keyRows = document.getElementsByClassName("keyRow");
   var samplePointer = 0;
   for (var i = 0; i < keyRows.length; i++){
-    var y = 200 * i; // x position
+    var y = vidOffset + 200 * i; // x position
     for (var j = 0; j<keyRows[i].children.length; j++){
       var x = 200 * j;
       newPad(keyRows[i].children[j], x, y, samplePointer);
@@ -410,7 +402,8 @@ function newPad(aDiv, x, y, samplePointer){
     var padOn = true;
   }
   pad.settingsPosition(x, y);
-  aDiv.pCtx = pad4;
+  aDiv.pCtx = pad;
+  console.log(aDiv + ' ' + aDiv.pCtx + ' ' + x + ' ' + y);
   aDiv.addEventListener('dragover', handleDragOver, false);
   aDiv.addEventListener('drop', handleFileSelect, false);
 
