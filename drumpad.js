@@ -17,13 +17,15 @@ var vidOffset = 300;
 
 var root = 'audio/drums/'; // change the root directory to pick different default samples
 
+var supportsMediaStream = false;
+
 var drumpad = function( sketch ) {
   var sample;
   var cnv;
   var bgColor = [ random(0,255), random(0,255), random(0,255) ];
   var recording = false;
   var recTime = 0;
-  var amp = new Amplitude();
+  var amp = new p5.Amplitude();
 
   // settings for this pad
   var rateSlider = createSlider(0,100,29);
@@ -59,9 +61,10 @@ var drumpad = function( sketch ) {
   sketch.draw = function() {
     if (mode === 'play'){
 
-      // reset the mic amplitude's volMax
-      mic.amplitude.volMax = .1;
-
+      if (supportsMediaStream) {
+        // reset the mic amplitude's volMax
+        mic.amplitude.volMax = .1;
+      }
       sketch.hideSettings();
       sketch.drawBackground();
     } else if (mode === 'rec') {
@@ -331,13 +334,20 @@ var createGUI = function() {
 };
 
 function setup(){
-  mic = new AudioIn();
   createGUI();
-  mic.start();
-  mic.amplitude.toggleNormalize();
-  fft = new FFT(.1, 128);
-  fft.setInput(mic);
-  recorder = new Recorder(mic);
+  if (typeof (window.MediaStreamTrack) !== 'undefined'){
+    mic = new p5.AudioIn();
+    mic.start();
+    mic.amplitude.toggleNormalize();
+    fft = new p5.FFT(.1, 128);
+    fft.setInput(mic);
+    recorder = new Recorder(mic);
+    supportsMediaStream = true;
+  }
+  else {
+    alert('Your browser does not provide access to the mic, so you wont be able to record your own samples');
+    supportsMediaStream = false;
+  }
 }
 
 function draw(){
@@ -352,13 +362,17 @@ function keyPressed(e){
 
 
 var toggleMode = function(){
-  if (mode !== 'rec') {
+  if (mode !== 'rec' && supportsMediaStream) {
     mode = 'rec';
     modeButtonLabel = 'Click a pad to record!'
   }
   else {
     mode = 'play';
-    modeButtonLabel = 'Switch to record mode';
+    if (supportsMediaStream) {
+      modeButtonLabel = 'Switch to record mode';
+    } else {
+      modeButtonLabel = 'Record mode disabled on this browser';
+    }
   }
 };
 
